@@ -88,3 +88,29 @@ stepMedianImputed <- median(TotalStepsByDayImputed$x,na.rm=T)
 print(paste("PART 3: The Mean number of steps per day is",round(stepMeanImputed,1)))
 
 print(paste("PART 3: The Median number of steps per day is",round(stepMedianImputed,1)))
+
+
+dfWithAvg$weekday <- weekdays(dfWithAvg$date)
+dfWithAvg$weekendFlag <- ifelse(dfWithAvg$weekday=="Saturday" | dfWithAvg$weekday=="Sunday","Weekend","Weekday")
+
+#Find the average steps per day for weekend and weekdays
+SPI2 <- aggregate(dfWithAvg$imputedSteps,list(intTime=dfWithAvg$intTime,weekendFlag=dfWithAvg$weekendFlag),mean,na.rm=TRUE)
+
+#Align data for plot
+xn <- seq(min(dfWithAvg$intTime),max(dfWithAvg$intTime),by="4 hour")
+
+#Plot
+xyplot(x~intTime|weekendFlag,
+       data=SPI2,
+       type="l",
+       layout=c(1,2),
+       xlab = "Time Interval (24-hour clock)",
+       ylab = "Average Steps",
+       main = "Average Steps per Day - Weekend vs Weekday",
+       scales=list(
+         x=list(
+           at=xn,
+           labels=format(xn,"%H:%M")
+         )
+       )
+)
