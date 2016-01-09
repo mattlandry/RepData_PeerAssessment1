@@ -127,7 +127,7 @@ print(paste("PART 3: The Median number of steps per day is",round(stepMedianImpu
 
 ```
 
-#Calculate new factors for weekday vs weekend
+#Calculate new factors for weekday vs weekends
 
 ```{r, echo=FALSE, results='hide', warning=FALSE, message=FALSE}
 
