@@ -7,13 +7,14 @@ output:
 ---
 
 
+## Loading the data
 
+```{r, echo=FALSE, results='hide', warning=FALSE, message=FALSE}
 library(lattice)
 library(knitr)
 opts_chunk$set(echo=TRUE,results="show",cache=TRUE)
 setwd('C:/Users/mlandry/Documents/GitHub/ReproducibleResearch/RepData_PeerAssessment1')
 
-#Load the CSV into a dataframe for this exercise
 Master <- read.table("activity.csv",
                      header=TRUE,
                      sep=",",
@@ -21,7 +22,11 @@ Master <- read.table("activity.csv",
                      colClasses = c("numeric","Date","numeric")
 )
 df <- Master
+```
 
+#Generate Histogram of total steps per day
+
+```{r, echo=FALSE, results='hide', warning=FALSE, message=FALSE}
 
 TotalStepsByDay <- aggregate(df$steps,list(date=df$date),sum,na.rm=TRUE)
 xAxis = seq(from=0,to=25000,by=2000) 
@@ -33,55 +38,71 @@ hist(TotalStepsByDay$x,
      ylab="Days",
      xaxt="n")
 axis(side=1,at=xAxis,labels=xAxis)
+```
 
+#Calculate mean and median steps per day
 
+```{r, echo=FALSE, results='hide', warning=FALSE, message=FALSE}
 stepMean <- mean(TotalStepsByDay$x,na.rm=T)
 print(paste("PART 1: The Mean number of steps per day is",round(stepMean,1)))
 stepMedian <- median(TotalStepsByDay$x,na.rm=T)
 print(paste("PART 1: The Median number of steps per day is",round(stepMedian,1)))
+```
 
+#Process data by converting time to something usable for this exercise, format adding 0's where needed
 
-#Converting time to something usable for this exercise, format adding 0's where needed
+```{r, echo=FALSE, results='hide', warning=FALSE, message=FALSE}
 intHours <- df$interval %/% 100
 intHours <- ifelse(intHours < 10,paste("0",intHours,sep=""),intHours)
 intMinutes <- df$interval %% 100
 intMinutes <- ifelse(intMinutes < 10,paste("0",intMinutes,sep=""),intMinutes)
 
-#Combine the standardized time data back into a time data format
 intTime <- paste(intHours,":",intMinutes,sep="")
 intTime <- strptime(intTime,format="%H:%M")
 df <- cbind(df,intTime)
+```
 
 #Start plotting the time
+
+```{r, echo=FALSE, results='hide', warning=FALSE, message=FALSE}
 SPI <- aggregate(df$steps,list(intTime=df$intTime),mean,na.rm=TRUE)
 plot(SPI$intTime,SPI$x,
      type = "l",
      main = "Average Steps per Interval",
      xlab = "Interval",
      ylab = "Average Steps")
+```
 
 #Which interval has the highest average?
+
+```{r, echo=FALSE, results='hide', warning=FALSE, message=FALSE}
 MaxStepAvg <- max(SPI$x)
 IntervalWithMaxStepAvg <- SPI$intTime[SPI$x == MaxStepAvg]
 print(paste("PART 2: The highest average is", MaxStepAvg))
 print(paste("PART 2: at this time", IntervalWithMaxStepAvg))
+```
 
-#Step 4
-#Part 1
+#Deal with missing values
+
+```{r, echo=FALSE, results='hide', warning=FALSE, message=FALSE}
 countNAs <- sum(is.na(df$steps))
 print(paste("PART 2: Number of missing values =", countNAs))
+```
 
-#Part 2
-#Rename column "x"
+#Fill in missing values
+
+```{r, echo=FALSE, results='hide', warning=FALSE, message=FALSE}
 names(SPI)[names(SPI)=="x"] <- "avgIntervalSteps"
-
-#Bring the average back to the dataframe
 dfWithAvg <- merge(x=df,y=SPI,by="intTime",all.x=TRUE)
 dfWithAvg <- dfWithAvg[order(dfWithAvg$date,dfWithAvg$intTime),]
 dfWithAvg$imputedSteps <- ifelse(is.na(dfWithAvg$steps), 
                                  dfWithAvg$avgIntervalSteps,
                                  dfWithAvg$steps)
+```
 
+#Plot total # of steps per day
+
+```{r, echo=FALSE, results='hide', warning=FALSE, message=FALSE}
 TotalStepsByDayImputed <- aggregate(dfWithAvg$imputedSteps,list(date=dfWithAvg$date),sum,na.rm=TRUE)
 xAxis = seq(from=0,to=25000,by=2000) 
 hist(TotalStepsByDayImputed$x,
@@ -92,6 +113,11 @@ hist(TotalStepsByDayImputed$x,
      ylab="Days",
      xaxt="n")
 axis(side=1,at=xAxis,labels=xAxis)
+```
+
+#Calculate mean and median steps per day
+
+```{r, echo=FALSE, results='hide', warning=FALSE, message=FALSE}
 
 stepMeanImputed <- mean(TotalStepsByDayImputed$x,na.rm=T)
 stepMedianImputed <- median(TotalStepsByDayImputed$x,na.rm=T)
@@ -99,6 +125,11 @@ print(paste("PART 3: The Mean number of steps per day is",round(stepMeanImputed,
 
 print(paste("PART 3: The Median number of steps per day is",round(stepMedianImputed,1)))
 
+```
+
+#Calculate new factors for weekday vs weekend
+
+```{r, echo=FALSE, results='hide', warning=FALSE, message=FALSE}
 
 dfWithAvg$weekday <- weekdays(dfWithAvg$date)
 dfWithAvg$weekendFlag <- ifelse(dfWithAvg$weekday=="Saturday" | dfWithAvg$weekday=="Sunday","Weekend","Weekday")
@@ -108,8 +139,11 @@ SPI2 <- aggregate(dfWithAvg$imputedSteps,list(intTime=dfWithAvg$intTime,weekendF
 
 #Align data for plot
 xn <- seq(min(dfWithAvg$intTime),max(dfWithAvg$intTime),by="4 hour")
+```
 
-#Plot
+#Make a panel plot with the time series data for the weekday vs weekend
+
+```{r, echo=FALSE, results='hide', warning=FALSE, message=FALSE}
 xyplot(x~intTime|weekendFlag,
        data=SPI2,
        type="l",
@@ -124,3 +158,4 @@ xyplot(x~intTime|weekendFlag,
          )
        )
 )
+```
