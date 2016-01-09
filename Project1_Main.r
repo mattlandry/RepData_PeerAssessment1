@@ -53,5 +53,38 @@ plot(SPI$intTime,SPI$x,
 #Which interval has the highest average?
 MaxStepAvg <- max(SPI$x)
 IntervalWithMaxStepAvg <- SPI$intTime[SPI$x == MaxStepAvg]
-print(paste("The highest average is", MaxStepAvg))
-print(paste("at this time", IntervalWithMaxStepAvg))
+print(paste("PART 2: The highest average is", MaxStepAvg))
+print(paste("PART 2: at this time", IntervalWithMaxStepAvg))
+
+#Step 4
+#Part 1
+countNAs <- sum(is.na(df$steps))
+print(paste("PART 2: Number of missing values =", countNAs))
+
+#Part 2
+#Rename column "x"
+names(SPI)[names(SPI)=="x"] <- "avgIntervalSteps"
+
+#Bring the average back to the dataframe
+dfWithAvg <- merge(x=df,y=SPI,by="intTime",all.x=TRUE)
+dfWithAvg <- dfWithAvg[order(dfWithAvg$date,dfWithAvg$intTime),]
+dfWithAvg$imputedSteps <- ifelse(is.na(dfWithAvg$steps), 
+                                 dfWithAvg$avgIntervalSteps,
+                                 dfWithAvg$steps)
+
+TotalStepsByDayImputed <- aggregate(dfWithAvg$imputedSteps,list(date=dfWithAvg$date),sum,na.rm=TRUE)
+xAxis = seq(from=0,to=25000,by=2000) 
+hist(TotalStepsByDayImputed$x,
+     breaks = xAxis,
+     main="Frequency of Total Steps (imputed) per Day",
+     col="blue",
+     xlab="Steps",
+     ylab="Days",
+     xaxt="n")
+axis(side=1,at=xAxis,labels=xAxis)
+
+stepMeanImputed <- mean(TotalStepsByDayImputed$x,na.rm=T)
+stepMedianImputed <- median(TotalStepsByDayImputed$x,na.rm=T)
+print(paste("PART 3: The Mean number of steps per day is",round(stepMeanImputed,1)))
+
+print(paste("PART 3: The Median number of steps per day is",round(stepMedianImputed,1)))
