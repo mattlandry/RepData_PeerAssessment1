@@ -9,7 +9,7 @@ output:
 
 ## Loading the data
 
-```{r, echo=FALSE, results='hide', warning=FALSE, message=FALSE}
+```{r}
 library(lattice)
 library(knitr)
 opts_chunk$set(echo=TRUE,results="show",cache=TRUE)
@@ -42,7 +42,7 @@ axis(side=1,at=xAxis,labels=xAxis)
 
 #Calculate mean and median steps per day
 
-```{r, echo=FALSE, results='hide', warning=FALSE, message=FALSE}
+```{r}
 stepMean <- mean(TotalStepsByDay$x,na.rm=T)
 print(paste("PART 1: The Mean number of steps per day is",round(stepMean,1)))
 stepMedian <- median(TotalStepsByDay$x,na.rm=T)
@@ -51,7 +51,7 @@ print(paste("PART 1: The Median number of steps per day is",round(stepMedian,1))
 
 #Process data by converting time to something usable for this exercise, format adding 0's where needed
 
-```{r, echo=FALSE, results='hide', warning=FALSE, message=FALSE}
+```{r}
 intHours <- df$interval %/% 100
 intHours <- ifelse(intHours < 10,paste("0",intHours,sep=""),intHours)
 intMinutes <- df$interval %% 100
@@ -75,7 +75,7 @@ plot(SPI$intTime,SPI$x,
 
 #Which interval has the highest average?
 
-```{r, echo=FALSE, results='hide', warning=FALSE, message=FALSE}
+```{r}
 MaxStepAvg <- max(SPI$x)
 IntervalWithMaxStepAvg <- SPI$intTime[SPI$x == MaxStepAvg]
 print(paste("PART 2: The highest average is", MaxStepAvg))
@@ -84,14 +84,14 @@ print(paste("PART 2: at this time", IntervalWithMaxStepAvg))
 
 #Deal with missing values
 
-```{r, echo=FALSE, results='hide', warning=FALSE, message=FALSE}
+```{r}
 countNAs <- sum(is.na(df$steps))
 print(paste("PART 2: Number of missing values =", countNAs))
 ```
 
 #Fill in missing values
 
-```{r, echo=FALSE, results='hide', warning=FALSE, message=FALSE}
+```{r}
 names(SPI)[names(SPI)=="x"] <- "avgIntervalSteps"
 dfWithAvg <- merge(x=df,y=SPI,by="intTime",all.x=TRUE)
 dfWithAvg <- dfWithAvg[order(dfWithAvg$date,dfWithAvg$intTime),]
@@ -102,7 +102,7 @@ dfWithAvg$imputedSteps <- ifelse(is.na(dfWithAvg$steps),
 
 #Plot total # of steps per day
 
-```{r, echo=FALSE, results='hide', warning=FALSE, message=FALSE}
+```{r, echo=TRUE, results='hide', warning=FALSE, message=FALSE}
 TotalStepsByDayImputed <- aggregate(dfWithAvg$imputedSteps,list(date=dfWithAvg$date),sum,na.rm=TRUE)
 xAxis = seq(from=0,to=25000,by=2000) 
 hist(TotalStepsByDayImputed$x,
@@ -117,7 +117,7 @@ axis(side=1,at=xAxis,labels=xAxis)
 
 #Calculate mean and median steps per day
 
-```{r, echo=FALSE, results='hide', warning=FALSE, message=FALSE}
+```{r}
 
 stepMeanImputed <- mean(TotalStepsByDayImputed$x,na.rm=T)
 stepMedianImputed <- median(TotalStepsByDayImputed$x,na.rm=T)
@@ -129,7 +129,7 @@ print(paste("PART 3: The Median number of steps per day is",round(stepMedianImpu
 
 #Calculate new factors for weekday vs weekends
 
-```{r, echo=FALSE, results='hide', warning=FALSE, message=FALSE}
+```{r}
 
 dfWithAvg$weekday <- weekdays(dfWithAvg$date)
 dfWithAvg$weekendFlag <- ifelse(dfWithAvg$weekday=="Saturday" | dfWithAvg$weekday=="Sunday","Weekend","Weekday")
